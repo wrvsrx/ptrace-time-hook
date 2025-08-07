@@ -8,21 +8,29 @@
 - ✅ 支持对静态链接和动态链接的二进制文件进行 hook
 - ✅ 实时修改系统调用返回值
 
-## 文件说明
+## 文件结构
 
-- `simple_hook.c` - ptrace hook 程序，用于拦截和修改 time() 系统调用
-- `multi_time_test.c` - 多次时间调用测试程序
-- `minimal_test.c` - 最小化测试程序（无库依赖）
+```
+├── src/
+│   └── main.c              # ptrace hook 程序主文件
+├── tests/
+│   ├── minimal_test.c      # 最小化测试程序（无库依赖）
+│   └── multi_time_test.c   # 多次时间调用测试程序
+├── flake.nix               # Nix flake 配置
+├── default.nix             # Nix 打包配置
+└── README.md               # 项目文档
+```
 
 ## 编译
 
 ```bash
-# 编译 hook 程序
-cc -o simple_hook simple_hook.c
+# 使用 Makefile
+make all
 
-# 编译测试程序
-cc -o multi_time_test multi_time_test.c
-cc -o minimal_test minimal_test.c
+# 或手动编译
+cc -o simple_hook src/main.c
+cc -o tests/minimal_test tests/minimal_test.c
+cc -o tests/multi_time_test tests/multi_time_test.c
 ```
 
 ## 使用方法
@@ -32,16 +40,16 @@ cc -o minimal_test minimal_test.c
 ./simple_hook <target_binary> [args...]
 
 # 示例：hook 测试程序
-./simple_hook ./multi_time_test
-./simple_hook ./minimal_test
+./simple_hook ./tests/multi_time_test
+./simple_hook ./tests/minimal_test
 ```
 
 ## 验证结果
 
 ```bash
 # 对比原始输出和 hook 后输出
-echo "=== 原始 ===" && ./minimal_test
-echo "=== Hook ===" && ./simple_hook ./minimal_test
+echo "=== 原始 ===" && ./tests/minimal_test
+echo "=== Hook ===" && ./simple_hook ./tests/minimal_test
 ```
 
 输出示例：
@@ -58,7 +66,7 @@ Modified time() return to 1640995200
 
 程序中设置的固定时间为：`1640995200` (2022-01-01 00:00:00 UTC)
 
-你可以修改 `simple_hook.c` 中的 `FIXED_TIME` 宏来设置不同的时间值。
+你可以修改 `src/main.c` 中的 `FIXED_TIME` 宏来设置不同的时间值。
 
 ## 技术说明
 

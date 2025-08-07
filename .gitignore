@@ -1,7 +1,7 @@
 # Compiled binaries
 simple_hook
-minimal_test
-multi_time_test
+tests/minimal_test
+tests/multi_time_test
 
 # Object files
 *.o

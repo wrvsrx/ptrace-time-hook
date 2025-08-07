@@ -1,18 +1,18 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g
 
-all: time_hook test_program test_static
+all: simple_hook tests/minimal_test tests/multi_time_test
 
-time_hook: time_hook.c
-	$(CC) $(CFLAGS) -o time_hook time_hook.c
+simple_hook: src/main.c
+	$(CC) $(CFLAGS) -o simple_hook src/main.c
 
-test_program: test_program.c
-	$(CC) $(CFLAGS) -o test_program test_program.c
+tests/minimal_test: tests/minimal_test.c
+	$(CC) $(CFLAGS) -o tests/minimal_test tests/minimal_test.c
 
-test_static: test_program.c
-	$(CC) $(CFLAGS) -static -o test_static test_program.c
+tests/multi_time_test: tests/multi_time_test.c
+	$(CC) $(CFLAGS) -o tests/multi_time_test tests/multi_time_test.c
 
 clean:
-	rm -f time_hook test_program test_static
+	rm -f simple_hook tests/minimal_test tests/multi_time_test
 
 .PHONY: all clean
