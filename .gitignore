@@ -1,0 +1,62 @@
+# Compiled binaries
+simple_hook
+time_hook
+direct_syscall
+minimal_test
+multi_time_test
+test_program
+test_syscall
+
+# Object files
+*.o
+*.a
+*.so
+*.dylib
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Core dumps
+core
+core.*
+
+# Temporary files
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Build directories
+build/
+dist/
+
+# Nix result symlinks
+result
+result-*
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.sublime-*
+.project
+.cproject
+.settings/
+
+# Test output files
+*.txt
+*.log
+
+# Coverage files
+*.gcov
+*.gcno
+*.gcda
+
+# Valgrind output
+vgcore.*
+massif.out.*
+callgrind.out.*
+EOF < /dev/null
