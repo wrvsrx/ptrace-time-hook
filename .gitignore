@@ -56,3 +56,6 @@ vgcore.*
 massif.out.*
 callgrind.out.*
 EOF < /dev/null
+
+/.direnv
+/.envrc
