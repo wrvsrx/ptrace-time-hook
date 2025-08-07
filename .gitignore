@@ -1,11 +1,7 @@
 # Compiled binaries
 simple_hook
-time_hook
-direct_syscall
 minimal_test
 multi_time_test
-test_program
-test_syscall
 
 # Object files
 *.o

@@ -10,20 +10,17 @@
 
 ## 文件说明
 
-- `simple_hook.c` - **推荐使用** - 简化高效的 ptrace hook 程序
-- `time_hook.c` - 完整版 ptrace hook 程序（包含更多系统调用支持）
-- `direct_syscall.c` - 直接汇编系统调用测试程序
+- `simple_hook.c` - ptrace hook 程序，用于拦截和修改 time() 系统调用
 - `multi_time_test.c` - 多次时间调用测试程序
 - `minimal_test.c` - 最小化测试程序（无库依赖）
 
 ## 编译
 
 ```bash
-# 编译推荐的简化版本
+# 编译 hook 程序
 cc -o simple_hook simple_hook.c
 
 # 编译测试程序
-cc -o direct_syscall direct_syscall.c
 cc -o multi_time_test multi_time_test.c
 cc -o minimal_test minimal_test.c
 ```
@@ -35,7 +32,6 @@ cc -o minimal_test minimal_test.c
 ./simple_hook <target_binary> [args...]
 
 # 示例：hook 测试程序
-./simple_hook ./direct_syscall
 ./simple_hook ./multi_time_test
 ./simple_hook ./minimal_test
 ```
@@ -62,14 +58,14 @@ Modified time() return to 1640995200
 
 程序中设置的固定时间为：`1640995200` (2022-01-01 00:00:00 UTC)
 
-你可以修改 `time_hook.c` 中的 `FIXED_TIME` 宏来设置不同的时间值。
+你可以修改 `simple_hook.c` 中的 `FIXED_TIME` 宏来设置不同的时间值。
 
 ## 技术说明
 
 该工具使用 Linux 的 ptrace 系统调用来：
 1. 跟踪目标进程的系统调用
-2. 识别时间相关的系统调用（time, clock_gettime）
-3. 在系统调用返回时修改返回值或内存中的时间结构
+2. 识别 time() 系统调用
+3. 在系统调用返回时修改返回值
 
 ## 限制
 

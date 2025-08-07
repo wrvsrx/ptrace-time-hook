@@ -12,8 +12,6 @@ stdenv.mkDerivation rec {
   # Source files to include in build
   sourceFiles = [
     "simple_hook.c"
-    "time_hook.c" 
-    "direct_syscall.c"
     "multi_time_test.c"
     "minimal_test.c"
     "README.md"
@@ -24,12 +22,10 @@ stdenv.mkDerivation rec {
     
     echo "Building ptrace time hook programs..."
     
-    # Build main hook programs
+    # Build main hook program
     $CC -Wall -Wextra -g -o simple_hook simple_hook.c
-    $CC -Wall -Wextra -g -o time_hook time_hook.c
     
     # Build test programs  
-    $CC -Wall -Wextra -g -o direct_syscall direct_syscall.c
     $CC -Wall -Wextra -g -o multi_time_test multi_time_test.c
     $CC -Wall -Wextra -g -o minimal_test minimal_test.c
     
@@ -44,12 +40,10 @@ stdenv.mkDerivation rec {
     mkdir -p $out/share/doc/ptrace-time-hook
     mkdir -p $out/share/ptrace-time-hook/tests
     
-    # Install main programs
+    # Install main program
     install -m755 simple_hook $out/bin/
-    install -m755 time_hook $out/bin/
     
     # Install test programs
-    install -m755 direct_syscall $out/share/ptrace-time-hook/tests/
     install -m755 multi_time_test $out/share/ptrace-time-hook/tests/
     install -m755 minimal_test $out/share/ptrace-time-hook/tests/
     
@@ -58,7 +52,6 @@ stdenv.mkDerivation rec {
     
     # Install source files for reference
     install -m644 simple_hook.c $out/share/doc/ptrace-time-hook/
-    install -m644 time_hook.c $out/share/doc/ptrace-time-hook/
     
     runHook postInstall
   '';
