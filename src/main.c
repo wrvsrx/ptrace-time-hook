@@ -5,19 +5,84 @@
 #include <sys/wait.h>
 #include <sys/user.h>
 #include <sys/syscall.h>
+#include <string.h>
+#include <getopt.h>
 
-#define FIXED_TIME 1640995200L
+static int verbose = 0;
+static long target_time = 0; // Default to Unix epoch (1970-01-01 00:00:00)
+
+void print_usage(const char *program_name) {
+    printf("Usage: %s [OPTIONS] <program> [args...]\n", program_name);
+    printf("Hook time() syscalls and replace with specified time\n\n");
+    printf("Options:\n");
+    printf("  -v, --verbose     Enable verbose output\n");
+    printf("  -t, --time TIME   Set target time (Unix timestamp, default: 0)\n");
+    printf("  -h, --help        Show this help message\n");
+    printf("\nExamples:\n");
+    printf("  %s ./test_program\n", program_name);
+    printf("  %s --time 1640995200 ./test_program  # 2022-01-01 00:00:00 UTC\n", program_name);
+    printf("  %s --verbose --time 0 ./test_program\n", program_name);
+}
+
+int parse_args(int argc, char *argv[], int *target_argc, char ***target_argv) {
+    static struct option long_options[] = {
+        {"verbose", no_argument, 0, 'v'},
+        {"time", required_argument, 0, 't'},
+        {"help", no_argument, 0, 'h'},
+        {0, 0, 0, 0}
+    };
+
+    int c;
+    int option_index = 0;
+
+    while ((c = getopt_long(argc, argv, "vt:h", long_options, &option_index)) != -1) {
+        switch (c) {
+            case 'v':
+                verbose = 1;
+                break;
+            case 't':
+                target_time = strtol(optarg, NULL, 10);
+                break;
+            case 'h':
+                print_usage(argv[0]);
+                return 0;
+            case '?':
+                return -1;
+            default:
+                return -1;
+        }
+    }
+
+    if (optind >= argc) {
+        fprintf(stderr, "Error: No target program specified\n");
+        print_usage(argv[0]);
+        return -1;
+    }
+
+    *target_argc = argc - optind;
+    *target_argv = &argv[optind];
+    return 1;
+}
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        printf("Usage: %s <program>\n", argv[0]);
-        return 1;
+    int target_argc;
+    char **target_argv;
+    
+    int parse_result = parse_args(argc, argv, &target_argc, &target_argv);
+    if (parse_result <= 0) {
+        return parse_result == 0 ? 0 : 1;
+    }
+
+    if (verbose) {
+        printf("time-hook: Target program: %s\n", target_argv[0]);
+        printf("time-hook: Target time: %ld\n", target_time);
     }
 
     pid_t child = fork();
     if (child == 0) {
         ptrace(PTRACE_TRACEME);
-        execvp(argv[1], &argv[1]);
+        execvp(target_argv[0], target_argv);
+        perror("execvp failed");
         return 1;
     }
 
@@ -37,7 +102,9 @@ int main(int argc, char *argv[]) {
         ptrace(PTRACE_GETREGS, child, 0, &regs);
         
         if (regs.orig_rax == SYS_time) {
-            printf("Found time() syscall!\n");
+            if (verbose) {
+                printf("time-hook: Found time() syscall\n");
+            }
             
             // Continue to syscall exit
             ptrace(PTRACE_SYSCALL, child, 0, 0);
@@ -47,13 +114,17 @@ int main(int argc, char *argv[]) {
             
             // Modify return value
             ptrace(PTRACE_GETREGS, child, 0, &regs);
-            regs.rax = FIXED_TIME;
+            regs.rax = target_time;
             ptrace(PTRACE_SETREGS, child, 0, &regs);
             
-            printf("Modified time() return to %ld\n", FIXED_TIME);
+            if (verbose) {
+                printf("time-hook: Modified time() return to %ld\n", target_time);
+            }
         }
     }
     
-    printf("Process finished\n");
+    if (verbose) {
+        printf("time-hook: Process finished\n");
+    }
     return 0;
 }
