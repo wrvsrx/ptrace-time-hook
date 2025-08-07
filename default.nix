@@ -24,7 +24,7 @@ stdenv.mkDerivation {
     runHook preInstall
 
     # Install main program
-    install -D -m755 time-hook $out/bin/
+    install -D -m755 time-hook $out/bin/$pname
 
     runHook postInstall
   '';
@@ -90,5 +90,4 @@ stdenv.mkDerivation {
     platforms = [ "x86_64-linux" ];
     maintainers = [ ];
   };
-
 }
