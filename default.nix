@@ -11,7 +11,7 @@ stdenv.mkDerivation {
     echo "Building ptrace time hook programs..."
 
     # Build main hook program
-    $CC -Wall -Wextra -g -o time-hook src/main.c
+    $CC -Wall -Wextra -g -o $pname src/main.c
 
     # Build test programs  
     $CC -Wall -Wextra -g -o multi_time_test tests/multi_time_test.c
@@ -24,7 +24,7 @@ stdenv.mkDerivation {
     runHook preInstall
 
     # Install main program
-    install -D -m755 time-hook $out/bin/$pname
+    install -D -m755 $pname $out/bin/$pname
 
     runHook postInstall
   '';
@@ -43,7 +43,7 @@ stdenv.mkDerivation {
 
     # Test 2: Hook functionality test  
     echo "Test 2: Verify hook intercepts and modifies time"
-    timeout 10s ./time-hook --verbose ./minimal_test > hooked_output.txt 2>&1 || true
+    timeout 10s ./$pname --verbose ./minimal_test > hooked_output.txt 2>&1 || true
 
     if grep -q "Found time() syscall" hooked_output.txt && grep -q "Time: 0" hooked_output.txt; then
       echo "✅ Hook successfully intercepted and modified time() syscall"
@@ -56,7 +56,7 @@ stdenv.mkDerivation {
 
     # Test 3: Multiple time calls test
     echo "Test 3: Verify multiple time call handling"
-    timeout 15s ./time-hook --verbose ./multi_time_test > multi_output.txt 2>&1 || true
+    timeout 15s ./$pname --verbose ./multi_time_test > multi_output.txt 2>&1 || true
 
     if grep -q "Call 1: time = 0" multi_output.txt && grep -q "Call 3: time = 0" multi_output.txt; then
       echo "✅ Hook successfully handled multiple time calls with consistent fixed value"
